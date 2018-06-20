@@ -1,25 +1,15 @@
 from django.core.validators import RegexValidator
 from django.utils import timezone
-from django.conf import settings
 from django.db import models
-import os, random, time, datetime
+import os
 
-"""
-TODO's:
-- file validations
-- functions for file handling
-"""
+from .utils import get_zip_upload_path, validate_file_field
+from .utils import get_image_upload_path, get_segmentation_plot_file_path
+from .utils import get_segmentation_fixed_image_path, get_segmentation_plot_image_path
 
-def replace_space_with_underscore(string):
-    return '_'.join(string.split(' '))
-
-def random_alpha_numeric_generator():
-    return ''.join(random.choice('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ') for i in range(8))
-
-def get_current_timestamp():
-    return datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d_%H%M%S')
 
 class Language(models.Model):
+    """Model for language."""
     code = models.CharField(max_length=20)
     name = models.CharField(max_length=20, default='English')
     postprocessing_enabled = models.BooleanField(default=False)
@@ -33,7 +23,9 @@ class Language(models.Model):
     def __str__(self):
         return self.name
 
+
 class BookTag(models.Model):
+    """Book Tag model."""
     tag = models.CharField(max_length=20)
 
     class Meta:
@@ -42,19 +34,9 @@ class BookTag(models.Model):
     def __str__(self):
         return self.tag
 
-def get_zip_upload_path(instance, filename):
-
-    print("Zip file uploaded to: `{}`".format(os.path.join('compressed_input', str(instance.language.id),
-                        str(get_current_timestamp()) + '_' + replace_space_with_underscore(instance.title),
-                        filename)))
-    return os.path.join('compressed_input', str(instance.language.id),
-                        str(get_current_timestamp()) + '_' + replace_space_with_underscore(instance.title),
-                        filename)
-
-def validate_file_field(value):
-    pass
 
 class Book(models.Model):
+    """Storing books in the database."""
     code = models.CharField(max_length=20, default='')
     title = models.CharField(max_length=255, default='')
     author = models.CharField(max_length=255, blank=True)
@@ -62,10 +44,9 @@ class Book(models.Model):
     language = models.ForeignKey(Language, default=1)
     year = models.CharField(max_length=4, blank=True,
                             validators=[RegexValidator(regex=r'^\d{4}$',
-                            message='Enter 4 digit year.')])
+                                        message='Enter 4 digit year.')])
     tags = models.ManyToManyField(BookTag, blank=True)
-    details = models.CharField('Additional Info', max_length=2048, blank=True,
-                                null=True)
+    details = models.CharField('Additional Info', max_length=2048, blank=True, null=True)
     created = models.DateTimeField(default=timezone.now)
     modified = models.DateTimeField(default=timezone.now)
     is_audio_required = models.BooleanField(default=False)
@@ -81,10 +62,12 @@ class Book(models.Model):
     def __str__(self):
         return '%s' % (self.title)
 
+
 class AudioBook(models.Model):
-    username = models.ForeignKey('auth.User', null=True) #userid
-    download_url = models.CharField(max_length=100) #generate path based on op dir + bookname_bookid + filename.mp3
-    book = models.ForeignKey(Book) #bookid
+    """Audio book model."""
+    username = models.ForeignKey('auth.User', null=True)    # userid
+    download_url = models.CharField(max_length=100)     # generate path based on op dir + bookname_bookid + filename.mp3
+    book = models.ForeignKey(Book)   # bookid
     created = models.DateTimeField(default=timezone.now)
 
     class Meta:
@@ -96,18 +79,9 @@ class AudioBook(models.Model):
     def __str__(self):
         return '%s' % (self.book.__str__())
 
-def get_image_upload_path(instance, filename):
-    print(os.path.join('uploaded_images', str(instance.language.name),
-                        str(instance.book.id) or
-                        random_alpha_numeric_generator() + '_uncatalogued',
-                        filename))
-    return os.path.join('uploaded_images', str(instance.language.name),
-                        str(instance.book.id) or
-                        random_alpha_numeric_generator() + '_uncatalogued',
-                        filename)
 
 class Upload(models.Model):
-    """ Uploaded Images """
+    """Uploaded Images."""
     STATUS_CHOICES = (
         ('', ''),
         ('new', 'New'),
@@ -131,39 +105,22 @@ class Upload(models.Model):
     def __str__(self):
         return str(os.path.split(self.image.name)[-1].split('_', 1)[-1])
 
-def get_segmentation_fixed_image_path(instance, filename):
-    return os.path.join(os.path.dirname(instance.image.image.name),
-                        os.path.basename(instance.image.image.name)
-                        + '.fixed' + os.path.splitext(filename)[1])
-
-def get_segmentation_plot_file_path(instance, filename):
-    return os.path.join(os.path.dirname(instance.image.image.name),
-                        os.path.basename(instance.image.image.name)
-                        + '.segmentation_plot_file'
-                        + os.path.splitext(filename)[1])
-
-def get_segmentation_plot_image_path(instance, filename):
-    return os.path.join(os.path.dirname(instance.image.image.name),
-                        os.path.basename(instance.image.image.name)
-                        + '.segmentation_plot_image'
-                        + os.path.splitext(filename)[1])
 
 class SegmentationResult(models.Model):
+    """Model to store Segmentation Results."""
     image = models.OneToOneField(Upload)
     manually_fixed = models.BooleanField(default=False)
     fixed_image = models.ImageField(upload_to=get_segmentation_fixed_image_path,
                                     null=True)
-    segmentation_plot_file = models.FileField(
-        upload_to=get_segmentation_plot_file_path, null=True)
+    segmentation_plot_file = models.FileField(upload_to=get_segmentation_plot_file_path, null=True)
     segmentation_plot_image = models.ImageField(
         upload_to=get_segmentation_plot_image_path, null=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
-def get_segmentation_plot_image_path_1(instance, filename):
-    return os.path.join(os.path.dirname(instance.image.image.name), filename)
 
 class OCRResult(models.Model):
+    """Results for the OCR."""
     image = models.OneToOneField(Upload)
     result = models.TextField(verbose_name='Recognized Text', blank=True)
     start_time = models.DateTimeField()
@@ -181,7 +138,9 @@ class OCRResult(models.Model):
     def __str__(self):
         return self.image.__str__()
 
+
 class ErrorWord(models.Model):
+    """Error words."""
     ocr_result = models.ForeignKey(OCRResult)
     word = models.CharField(max_length=255)
     corrected = models.CharField(max_length=255)
@@ -195,7 +154,9 @@ class ErrorWord(models.Model):
     def __str__(self):
         return self.word.strip()
 
+
 class ErrorWordSuggestion(models.Model):
+    """Suggestions for the Error words."""
     error_word = models.ForeignKey(ErrorWord)
     suggestion = models.CharField(max_length=255)
     suggestion_number = models.PositiveSmallIntegerField()

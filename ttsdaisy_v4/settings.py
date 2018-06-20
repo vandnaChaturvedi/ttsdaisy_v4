@@ -25,8 +25,8 @@ SECRET_KEY = '86wz67j)#p@^ocmi20m6zr^1bw9#kzvn4n2a=db+!20=1d!r!i'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost','10.1.128.142','14.139.82.6','iiit.ac.in', '127.0.0.1',
-                '10.2.16.111', '10.0.0.0', '10.2.132.8']
+ALLOWED_HOSTS = ['localhost', '10.1.128.142', '14.139.82.6', 'iiit.ac.in', '127.0.0.1',
+                 '10.2.16.111', '10.0.0.0', '10.2.132.8']
 
 
 # Application definition
@@ -38,8 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'accounts',
+    'django_extensions',
     'upload',
+    'accounts',
     'bootstrap3',
     'debug_toolbar',
 ]
@@ -60,7 +61,7 @@ ROOT_URLCONF = 'ttsdaisy_v4.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [TEMPLATE_DIR,],
+        'DIRS': [TEMPLATE_DIR, ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -133,12 +134,12 @@ LOGOUT_REDIRECT_URL = "thanks"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-#custsom download URL
-#CUSTOM_DOWNLOAD_URL = "http://127.0.0.1/download/"
+# custsom download URL/
+# CUSTOM_DOWNLOAD_URL = "http://127.0.0.1/download/"
 CUSTOM_DOWNLOAD_URL = "http://10.2.16.111/download/"
 
 # debug option
-INTERNAL_IPS = ['127.0.0.1','10.2.16.111']
+INTERNAL_IPS = ['127.0.0.1', '10.2.16.111']
 
 # temp dir
 TMP_DIR = os.path.join("tmp")
