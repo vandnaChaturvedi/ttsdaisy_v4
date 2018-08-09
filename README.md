@@ -2,7 +2,7 @@
 
 ### Update and install required packages
 sudo apt-get update  
-sudo apt-get install build-essential git python-dev python3-dev python-pip python-distutils-extra tesseract-ocr tesseract-ocr-eng libopencv-dev libtesseract-dev libleptonica-dev python-all-dev swig libcv-dev python-opencv python-numpy python-setuptools build-essential subversion autoconf automake libtool libpng12-dev libjpeg62-dev libtiff4-dev zlib1g-dev install libicu-dev libpango1.0-dev libcairo2-dev  
+sudo apt-get install build-essential git python-dev python3-dev python-pip python-distutils-extra tesseract-ocr tesseract-ocr-eng libopencv-dev libtesseract-dev libleptonica-dev python-all-dev swig libcv-dev python-opencv python-numpy python-setuptools build-essential subversion autoconf automake libtool libpng12-dev libjpeg62-dev libtiff5-dev zlib1g-dev install libicu-dev libpango1.0-dev libcairo2-dev  
 
 ### Clone the repository
 git clone https://github.com/vikramriyer/ttsdaisy_v4.git  
